@@ -1,0 +1,310 @@
+{
+	"info": {
+		"_postman_id": "1a77c418-5248-4180-bfa1-f1125b9ea70d",
+		"name": "Marafone API",
+		"description": "Postman tests for the provided backend API with response validation.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "40588503"
+	},
+	"item": [
+		{
+			"name": "Authentication and Authorization",
+			"item": [
+				{
+					"name": "Register",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Correctly set id, username and email\", function () {",
+									"",
+									"    const expectedUsername = pm.variables.get(\"username\");",
+									"    const expectedEmail = pm.variables.get(\"email\");",
+									"",
+									"    pm.expect(jsonData).to.have.property('id').that.is.a('number');",
+									"    pm.expect(jsonData).to.have.property('username').that.equals(expectedUsername);",
+									"    pm.expect(jsonData).to.have.property('email').that.equals(expectedEmail);",
+									"})",
+									"",
+									"pm.test(\"Account is not expired\", function() {",
+									"",
+									"    pm.expect(jsonData).to.have.property('credentialsNonExpired').that.is.true;",
+									"    pm.expect(jsonData).to.have.property('accountNonExpired').that.is.true;",
+									"})",
+									"",
+									"pm.test(\"Account is not locked\", function() {",
+									"",
+									"    pm.expect(jsonData).to.have.property('accountNonLocked').that.is.true;",
+									"})",
+									"",
+									"pm.test(\"Acoount is an User\", function() {",
+									"",
+									"     pm.expect(jsonData.authorities[0]).to.have.property('authority').that.equals('USER');",
+									"})"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"{{username}}\",\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Game",
+			"item": [
+				{
+					"name": "Create Game",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Game ID is returned as a plain number\", function () {",
+									"    ",
+									"    const gameId = pm.response.text(); // Extract the plain number from the response",
+									"    pm.expect(gameId).to.match(/^-?\\d+$/);",
+									"    pm.collectionVariables.set(\"gameId\", gameId); // Save game ID as a collection variable",
+									"    pm.environment.set(\"EnvGameId\", gameId);",
+									"});",
+									"    "
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "{{session_cookie}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"isPublic\": \"{{isPublic}}\",\n  \"typeOfGame\": \"{{typeOfGame}}\",\n  \"joinGameCode\": \"{{setGamePassword}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/game/create",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"game",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Join Game",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Game joined successfully\", function () {",
+									"    pm.expect(pm.response.text()).to.be.empty; // Assuming the response body is empty",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"team\": \"{{firstTeam}}\",\n    \"joinGameCode\": \"{{setGamePassword}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/game/{{gameId}}/join",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"game",
+								"{{gameId}}",
+								"join"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080"
+		},
+		{
+			"key": "email",
+			"value": "test3@example.com"
+		},
+		{
+			"key": "password",
+			"value": "password3"
+		},
+		{
+			"key": "username",
+			"value": "testuser3"
+		},
+		{
+			"key": "typeOfGame",
+			"value": "MARAFFA"
+		},
+		{
+			"key": "session_cookie",
+			"value": ""
+		},
+		{
+			"key": "gameId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "firstTeam",
+			"value": "RED",
+			"type": "string"
+		},
+		{
+			"key": "setGamePassword",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "isPublic",
+			"value": "true",
+			"type": "string"
+		}
+	]
+}
