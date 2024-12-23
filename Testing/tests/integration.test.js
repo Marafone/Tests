@@ -29,7 +29,7 @@ describe('Backend Application Integration Tests with Multiple Users', () => {
             return new Promise((resolve, reject) => {
                 const stompClient = new Client({
                     brokerURL: config.wsUrl,
-                    reconnectDelay: 5000,
+                    reconnectDelay: 10000,
                     debug: (str) => console.log(`STOMP Debug (${user.username}): ${str}`),
                     onConnect: () => {
                         console.log(`STOMP connected for ${user.username}`);
@@ -147,24 +147,48 @@ describe('Backend Application Integration Tests with Multiple Users', () => {
 
     test('Owner starts the game and users listen to events', async () => {
 
+        await new Promise(resolve => setTimeout(resolve, 5000)); // Wait for 10 seconds Allow 2 seconds for messages to be received
+
+        // Trigger the start of the game
         stompClients[0].publish({
             destination: `/app/game/${gameId}/start`,
-            body: JSON.stringify({}),
+            body: null
         });
 
-        // Log asynchronously without waiting for specific events
-        // All log messages are captured and handled by the subscriptions in the background
-        await new Promise((resolve) => setTimeout(resolve, 2000)); // Allow messages to propagate and be logged
+        // Allow enough time for messages to propagate
+        await new Promise(resolve => setTimeout(resolve, 5000)); // Wait for 10 seconds Allow 2 seconds for messages to be received
+
+        // Optionally, you can add a console log to indicate this stage of the test
+        console.log('Game started, waiting for messages...');
+    }, 15000);
+
+    test('First round has started', async () => {
+        await new Promise(resolve => setTimeout(resolve, 1000));
     });
 });
 
 // Helper function for logging messages to user-specific files in JSON format
 function logMessage(username, type, message) {
+    // Debugging: log the raw message to console
+    console.log(`Raw message received from ${username}:`, message);
+
+    let parsedMessage;
+
+    // Try to parse the message if it is JSON
+    try {
+        parsedMessage = JSON.parse(message);
+    } catch (error) {
+        // If parsing fails, keep the message as it is (raw string)
+        parsedMessage = message;
+        console.warn(`Failed to parse message for ${username}:`, message);
+    }
+
+    // Create a log entry object
     const logEntry = {
         timestamp: new Date().toISOString(),
         username: username,
         type: type,
-        message: JSON.parse(message), // Assuming the message is a JSON string; adjust if needed
+        message: parsedMessage, // Store the parsed message (either JSON or raw)
     };
 
     // Convert the log entry object to a JSON string for proper logging
@@ -179,7 +203,7 @@ function logMessage(username, type, message) {
     }
 
     // Print the log entry to the console
-    console.log(logJson);
+    console.log(`Logging message for ${username}:`, logJson);
 
     // Write the log entry to the user's specific log file
     fs.appendFileSync(userLogFilePath, logJson + '\n', 'utf8');

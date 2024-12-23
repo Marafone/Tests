@@ -43,3 +43,453 @@
     }
   ]
 }
+{
+  "timestamp": "2024-12-23T14:40:18.734Z",
+  "username": "player3",
+  "type": "Public",
+  "message": [
+    {
+      "eventType": "TeamState",
+      "teamState": {
+        "owner": "RED",
+        "player1": "RED"
+      }
+    }
+  ]
+}
+{
+  "timestamp": "2024-12-23T14:40:18.744Z",
+  "username": "player3",
+  "type": "Public",
+  "message": [
+    {
+      "eventType": "TeamState",
+      "teamState": {
+        "owner": "RED",
+        "player1": "RED",
+        "player2": "BLUE"
+      }
+    }
+  ]
+}
+{
+  "timestamp": "2024-12-23T14:40:18.755Z",
+  "username": "player3",
+  "type": "Public",
+  "message": [
+    {
+      "eventType": "TeamState",
+      "teamState": {
+        "owner": "RED",
+        "player1": "RED",
+        "player2": "BLUE",
+        "player3": "BLUE"
+      }
+    }
+  ]
+}
+{
+  "timestamp": "2024-12-23T14:41:16.703Z",
+  "username": "player3",
+  "type": "Public",
+  "message": [
+    {
+      "eventType": "TeamState",
+      "teamState": {
+        "owner": "RED",
+        "player1": "RED"
+      }
+    }
+  ]
+}
+{
+  "timestamp": "2024-12-23T14:41:16.718Z",
+  "username": "player3",
+  "type": "Public",
+  "message": [
+    {
+      "eventType": "TeamState",
+      "teamState": {
+        "owner": "RED",
+        "player1": "RED",
+        "player2": "BLUE"
+      }
+    }
+  ]
+}
+{
+  "timestamp": "2024-12-23T14:41:16.727Z",
+  "username": "player3",
+  "type": "Public",
+  "message": [
+    {
+      "eventType": "TeamState",
+      "teamState": {
+        "owner": "RED",
+        "player1": "RED",
+        "player2": "BLUE",
+        "player3": "BLUE"
+      }
+    }
+  ]
+}
+{
+  "timestamp": "2024-12-23T14:42:38.442Z",
+  "username": "player3",
+  "type": "Public",
+  "message": [
+    {
+      "eventType": "TeamState",
+      "teamState": {
+        "owner": "RED",
+        "player1": "RED"
+      }
+    }
+  ]
+}
+{
+  "timestamp": "2024-12-23T14:42:38.450Z",
+  "username": "player3",
+  "type": "Private",
+  "message": [
+    {
+      "eventType": "TeamState",
+      "teamState": {
+        "owner": "RED",
+        "player1": "RED"
+      }
+    }
+  ]
+}
+{
+  "timestamp": "2024-12-23T14:42:38.455Z",
+  "username": "player3",
+  "type": "Public",
+  "message": [
+    {
+      "eventType": "TeamState",
+      "teamState": {
+        "owner": "RED",
+        "player1": "RED",
+        "player2": "BLUE"
+      }
+    }
+  ]
+}
+{
+  "timestamp": "2024-12-23T14:42:38.462Z",
+  "username": "player3",
+  "type": "Private",
+  "message": [
+    {
+      "eventType": "TeamState",
+      "teamState": {
+        "owner": "RED",
+        "player1": "RED",
+        "player2": "BLUE"
+      }
+    }
+  ]
+}
+{
+  "timestamp": "2024-12-23T14:42:38.474Z",
+  "username": "player3",
+  "type": "Public",
+  "message": [
+    {
+      "eventType": "TeamState",
+      "teamState": {
+        "owner": "RED",
+        "player1": "RED",
+        "player2": "BLUE",
+        "player3": "BLUE"
+      }
+    }
+  ]
+}
+{
+  "timestamp": "2024-12-23T14:42:38.480Z",
+  "username": "player3",
+  "type": "Private",
+  "message": [
+    {
+      "eventType": "TeamState",
+      "teamState": {
+        "owner": "RED",
+        "player1": "RED",
+        "player2": "BLUE",
+        "player3": "BLUE"
+      }
+    }
+  ]
+}
+{
+  "timestamp": "2024-12-23T14:44:44.357Z",
+  "username": "player3",
+  "type": "Public",
+  "message": [
+    {
+      "eventType": "TeamState",
+      "teamState": {
+        "owner": "RED",
+        "player1": "RED"
+      }
+    }
+  ]
+}
+{
+  "timestamp": "2024-12-23T14:44:44.368Z",
+  "username": "player3",
+  "type": "Public",
+  "message": [
+    {
+      "eventType": "TeamState",
+      "teamState": {
+        "owner": "RED",
+        "player1": "RED",
+        "player2": "BLUE"
+      }
+    }
+  ]
+}
+{
+  "timestamp": "2024-12-23T14:44:44.377Z",
+  "username": "player3",
+  "type": "Public",
+  "message": [
+    {
+      "eventType": "TeamState",
+      "teamState": {
+        "owner": "RED",
+        "player1": "RED",
+        "player2": "BLUE",
+        "player3": "BLUE"
+      }
+    }
+  ]
+}
+{
+  "timestamp": "2024-12-23T14:50:06.013Z",
+  "username": "player3",
+  "type": "Public",
+  "message": [
+    {
+      "eventType": "TeamState",
+      "teamState": {
+        "owner": "RED",
+        "player1": "RED"
+      }
+    }
+  ]
+}
+{
+  "timestamp": "2024-12-23T14:50:06.022Z",
+  "username": "player3",
+  "type": "Public",
+  "message": [
+    {
+      "eventType": "TeamState",
+      "teamState": {
+        "owner": "RED",
+        "player1": "RED",
+        "player2": "BLUE"
+      }
+    }
+  ]
+}
+{
+  "timestamp": "2024-12-23T14:50:06.033Z",
+  "username": "player3",
+  "type": "Public",
+  "message": [
+    {
+      "eventType": "TeamState",
+      "teamState": {
+        "owner": "RED",
+        "player1": "RED",
+        "player2": "BLUE",
+        "player3": "BLUE"
+      }
+    }
+  ]
+}
+{
+  "timestamp": "2024-12-23T14:56:02.463Z",
+  "username": "player3",
+  "type": "Public",
+  "message": [
+    {
+      "eventType": "TeamState",
+      "teamState": {
+        "owner": "RED",
+        "player1": "RED"
+      }
+    }
+  ]
+}
+{
+  "timestamp": "2024-12-23T14:56:02.474Z",
+  "username": "player3",
+  "type": "Public",
+  "message": [
+    {
+      "eventType": "TeamState",
+      "teamState": {
+        "owner": "RED",
+        "player1": "RED",
+        "player2": "BLUE"
+      }
+    }
+  ]
+}
+{
+  "timestamp": "2024-12-23T14:56:02.482Z",
+  "username": "player3",
+  "type": "Public",
+  "message": [
+    {
+      "eventType": "TeamState",
+      "teamState": {
+        "owner": "RED",
+        "player1": "RED",
+        "player2": "BLUE",
+        "player3": "BLUE"
+      }
+    }
+  ]
+}
+{
+  "timestamp": "2024-12-23T14:58:59.783Z",
+  "username": "player3",
+  "type": "Public",
+  "message": [
+    {
+      "eventType": "TeamState",
+      "teamState": {
+        "owner": "RED",
+        "player1": "RED"
+      }
+    }
+  ]
+}
+{
+  "timestamp": "2024-12-23T14:58:59.788Z",
+  "username": "player3",
+  "type": "Public",
+  "message": [
+    {
+      "eventType": "TeamState",
+      "teamState": {
+        "owner": "RED",
+        "player1": "RED",
+        "player2": "BLUE"
+      }
+    }
+  ]
+}
+{
+  "timestamp": "2024-12-23T14:58:59.801Z",
+  "username": "player3",
+  "type": "Public",
+  "message": [
+    {
+      "eventType": "TeamState",
+      "teamState": {
+        "owner": "RED",
+        "player1": "RED",
+        "player2": "BLUE",
+        "player3": "BLUE"
+      }
+    }
+  ]
+}
+{
+  "timestamp": "2024-12-23T15:01:21.737Z",
+  "username": "player3",
+  "type": "Public",
+  "message": [
+    {
+      "eventType": "TeamState",
+      "teamState": {
+        "owner": "RED",
+        "player1": "RED"
+      }
+    }
+  ]
+}
+{
+  "timestamp": "2024-12-23T15:01:21.745Z",
+  "username": "player3",
+  "type": "Public",
+  "message": [
+    {
+      "eventType": "TeamState",
+      "teamState": {
+        "owner": "RED",
+        "player1": "RED",
+        "player2": "BLUE"
+      }
+    }
+  ]
+}
+{
+  "timestamp": "2024-12-23T15:01:21.757Z",
+  "username": "player3",
+  "type": "Public",
+  "message": [
+    {
+      "eventType": "TeamState",
+      "teamState": {
+        "owner": "RED",
+        "player1": "RED",
+        "player2": "BLUE",
+        "player3": "BLUE"
+      }
+    }
+  ]
+}
+{
+  "timestamp": "2024-12-23T15:12:11.647Z",
+  "username": "player3",
+  "type": "Public",
+  "message": [
+    {
+      "eventType": "TeamState",
+      "teamState": {
+        "owner": "RED",
+        "player1": "RED"
+      }
+    }
+  ]
+}
+{
+  "timestamp": "2024-12-23T15:12:11.665Z",
+  "username": "player3",
+  "type": "Public",
+  "message": [
+    {
+      "eventType": "TeamState",
+      "teamState": {
+        "owner": "RED",
+        "player1": "RED",
+        "player2": "BLUE"
+      }
+    }
+  ]
+}
+{
+  "timestamp": "2024-12-23T15:12:11.676Z",
+  "username": "player3",
+  "type": "Public",
+  "message": [
+    {
+      "eventType": "TeamState",
+      "teamState": {
+        "owner": "RED",
+        "player1": "RED",
+        "player2": "BLUE",
+        "player3": "BLUE"
+      }
+    }
+  ]
+}
