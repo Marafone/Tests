@@ -24,12 +24,24 @@ const setPassword = null;
 
 describe('Backend Application Integration Tests with Multiple Users', () => {
     beforeAll(async () => {
+
+        // Clear log files for each user before each test
+        users.forEach(user => {
+            const userLogFilePath = `./logs/${user.username}_websocket_messages.log`;
+            if (fs.existsSync(userLogFilePath)) {
+                fs.writeFileSync(userLogFilePath, '', { flag: 'w' }); // Clear existing log file
+            }
+        });
+
         // Initialize STOMP clients for all users
         const connectedPromises = users.map((user) => {
             return new Promise((resolve, reject) => {
                 const stompClient = new Client({
                     brokerURL: config.wsUrl,
-                    reconnectDelay: 10000,
+                    connectHeaders: {
+                        "Cookie": sessionCookies[user.username], // Include JSESSIONID cookie
+                    },
+                    reconnectDelay: 20000,
                     debug: (str) => console.log(`STOMP Debug (${user.username}): ${str}`),
                     onConnect: () => {
                         console.log(`STOMP connected for ${user.username}`);
@@ -79,8 +91,15 @@ describe('Backend Application Integration Tests with Multiple Users', () => {
             expect(response.status).toBe(200); // Ensure login is successful
             console.log(`Logged in ${user.username}:`, response.body);
 
+            // Extract JSESSIONID from Set-Cookie header
             const cookies = response.headers['set-cookie'];
-            sessionCookies[user.username] = cookies; // Store session cookies for each user
+            const jsessionId = cookies.find((cookie) => cookie.startsWith('JSESSIONID='));
+            if (jsessionId) {
+                sessionCookies[user.username] = jsessionId.split(';')[0]; // Save JSESSIONID
+            }
+
+            // Log the cookies to a file
+            logCookies(user.username, cookies);
         }
     });
 
@@ -103,6 +122,11 @@ describe('Backend Application Integration Tests with Multiple Users', () => {
             const stompClient = stompClients[i];
             const user = users[i];
 
+            // Set up STOMP client with session cookie for authentication
+            stompClient.connectHeaders = {
+                "Cookie": sessionCookies[user.username]     // Use session cookies
+            };
+
             // Subscribe to public game topic
             stompClient.subscribe(`/topic/game/${gameId}`, (message) => {
                 logMessage(user.username, 'Public', message.body);
@@ -114,49 +138,60 @@ describe('Backend Application Integration Tests with Multiple Users', () => {
             });
         }
 
-        const response1 = await supertest(app)
-            .post(`/game/${gameId}/join`)
-            .send({ team: 'RED', joinGameCode: null })
-            .set('Content-Type', 'application/json')
-            .set('Cookie', sessionCookies.player1); // Use player1's session cookie
+        const joinPromises = []; // To track each player's join
 
-        expect(response1.status).toBe(200); // Player 1 joins successfully
-        console.log('Player 1 joined the game');
+        // Join players and track their join status
+        joinPromises.push(
+            supertest(app)
+                .post(`/game/${gameId}/join`)
+                .send({ team: 'RED', joinGameCode: null })
+                .set('Content-Type', 'application/json')
+                .set('Cookie', sessionCookies.player1) // Use player1's session cookie
+                .then((response) => {
+                    expect(response.status).toBe(200); // Player 1 joins successfully
+                    console.log('Player 1 joined the game');
+                })
+        );
 
-        // Player 2 joins
-        const response2 = await supertest(app)
-            .post(`/game/${gameId}/join`)
-            .send({ team: 'BLUE', joinGameCode: null })
-            .set('Content-Type', 'application/json')
-            .set('Cookie', sessionCookies.player2); // Use player2's session cookie
+        joinPromises.push(
+            supertest(app)
+                .post(`/game/${gameId}/join`)
+                .send({ team: 'BLUE', joinGameCode: null })
+                .set('Content-Type', 'application/json')
+                .set('Cookie', sessionCookies.player2) // Use player2's session cookie
+                .then((response) => {
+                    expect(response.status).toBe(200); // Player 2 joins successfully
+                    console.log('Player 2 joined the game');
+                })
+        );
 
-        expect(response2.status).toBe(200); // Player 2 joins successfully
-        console.log('Player 2 joined the game');
+        joinPromises.push(
+            supertest(app)
+                .post(`/game/${gameId}/join`)
+                .send({ team: 'BLUE', joinGameCode: null })
+                .set('Content-Type', 'application/json')
+                .set('Cookie', sessionCookies.player3) // Use player3's session cookie
+                .then((response) => {
+                    expect(response.status).toBe(200); // Player 3 joins successfully
+                    console.log('Player 3 joined the game');
+                })
+        );
 
-        // Player 3 joins
-        const response3 = await supertest(app)
-            .post(`/game/${gameId}/join`)
-            .send({ team: 'BLUE', joinGameCode: null })
-            .set('Content-Type', 'application/json')
-            .set('Cookie', sessionCookies.player3); // Use player3's session cookie
-
-        expect(response3.status).toBe(200); // Player 3 joins successfully
-        console.log('Player 3 joined the game');
-
+        // Wait for all players to join before starting the game
+        await Promise.all(joinPromises); // Ensures all players have joined the game
     });
 
     test('Owner starts the game and users listen to events', async () => {
 
-        await new Promise(resolve => setTimeout(resolve, 5000)); // Wait for 10 seconds Allow 2 seconds for messages to be received
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for 10 seconds Allow 2 seconds for messages to be received
 
         // Trigger the start of the game
         stompClients[0].publish({
-            destination: `/app/game/${gameId}/start`,
-            body: null
+            destination: `/app/game/${gameId}/start`
         });
 
         // Allow enough time for messages to propagate
-        await new Promise(resolve => setTimeout(resolve, 5000)); // Wait for 10 seconds Allow 2 seconds for messages to be received
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for 10 seconds Allow 2 seconds for messages to be received
 
         // Optionally, you can add a console log to indicate this stage of the test
         console.log('Game started, waiting for messages...');
@@ -207,4 +242,30 @@ function logMessage(username, type, message) {
 
     // Write the log entry to the user's specific log file
     fs.appendFileSync(userLogFilePath, logJson + '\n', 'utf8');
+}
+
+
+// Log cookies to user-specific files
+function logCookies(username, cookies) {
+    const logDirectory = './cookies';
+    const userCookieLogFile = `${logDirectory}/${username}_cookies.log`;
+
+    // Ensure the log directory exists
+    if (!fs.existsSync(logDirectory)) {
+        fs.mkdirSync(logDirectory);
+    }
+
+    // Format the cookies for better readability
+    const logEntry = {
+        timestamp: new Date().toISOString(),
+        username: username,
+        cookies: cookies,
+    };
+
+    const logJson = JSON.stringify(logEntry, null, 2);
+
+    // Write the log entry to the user's specific cookie log file
+    fs.writeFileSync(userCookieLogFile, logJson + '\n', { flag: 'a', encoding: 'utf8' });
+
+    console.log(`Cookies logged for ${username}:`, logJson);
 }

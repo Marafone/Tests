@@ -1,0 +1,14 @@
+{
+  "timestamp": "2024-12-23T18:24:08.841Z",
+  "username": "player1",
+  "cookies": [
+    "JSESSIONID=56E4B043CA6D2FB3354BF4B980EBF0BA; Path=/; HttpOnly"
+  ]
+}
+{
+  "timestamp": "2024-12-23T18:38:29.078Z",
+  "username": "player1",
+  "cookies": [
+    "JSESSIONID=E6A10F14D16F14BFE49EF04770988453; Path=/; HttpOnly"
+  ]
+}
