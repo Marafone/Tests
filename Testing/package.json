@@ -10,6 +10,8 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@stomp/stompjs": "^7.0.0",
+    "node-fetch": "^3.3.2",
     "supertest": "^7.0.0",
     "ws": "^8.18.0"
   },

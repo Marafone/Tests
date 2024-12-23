@@ -1,5 +1,6 @@
 // tests/testConfig.js
 module.exports = {
+
     appUrl: 'http://localhost:8080',
     wsUrl: 'ws://localhost:8080/game',
 
@@ -27,6 +28,5 @@ module.exports = {
     gameData: {
         gameType: 'MARAFFA',
         joinGameCode: null,
-        gameId: 'sample-game-id',
     },
 };
