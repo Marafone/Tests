@@ -28,37 +28,14 @@ describe('Backend Application Integration Tests with Multiple Users', () => {
         // Clear log files for each user before each test
         users.forEach(user => {
             const userLogFilePath = `./logs/${user.username}_websocket_messages.log`;
+            const userCookiesLogFilePath = `./cookies/${user.username}_cookies.log`;
             if (fs.existsSync(userLogFilePath)) {
                 fs.writeFileSync(userLogFilePath, '', { flag: 'w' }); // Clear existing log file
             }
+            if(fs.existsSync(userCookiesLogFilePath)) {
+                fs.writeFileSync(userCookiesLogFilePath, '', { flag: 'w' }); // Clear existing cookies path
+            }
         });
-
-        // Initialize STOMP clients for all users
-        const connectedPromises = users.map((user) => {
-            return new Promise((resolve, reject) => {
-                const stompClient = new Client({
-                    brokerURL: config.wsUrl,
-                    connectHeaders: {
-                        "Cookie": sessionCookies[user.username], // Include JSESSIONID cookie
-                    },
-                    reconnectDelay: 20000,
-                    debug: (str) => console.log(`STOMP Debug (${user.username}): ${str}`),
-                    onConnect: () => {
-                        console.log(`STOMP connected for ${user.username}`);
-                        resolve();
-                    },
-                    onStompError: (frame) => {
-                        console.error(`STOMP error for ${user.username}:`, frame);
-                        reject(new Error(frame.headers['message']));
-                    },
-                });
-
-                stompClient.activate();
-                stompClients.push(stompClient);
-            });
-        });
-
-        await Promise.all(connectedPromises); // Wait for all STOMP clients to connect
     });
 
     afterAll(async () => {
@@ -96,11 +73,41 @@ describe('Backend Application Integration Tests with Multiple Users', () => {
             const jsessionId = cookies.find((cookie) => cookie.startsWith('JSESSIONID='));
             if (jsessionId) {
                 sessionCookies[user.username] = jsessionId.split(';')[0]; // Save JSESSIONID
+                sessionCookies[user.username] = sessionCookies[user.username].split(';')[0];
             }
 
             // Log the cookies to a file
-            logCookies(user.username, cookies);
+            logCookies(user.username, sessionCookies[user.username]);
         }
+    });
+
+    test('All users create stomp sessions', async () => {
+        // Initialize STOMP clients for all users
+        const connectedPromises = users.map((user) => {
+            return new Promise((resolve, reject) => {
+                const stompClient = new Client({
+                    brokerURL: config.wsUrl,
+                    connectHeaders: {
+                        "Cookie": sessionCookies[user.username], // Include JSESSIONID cookie
+                    },
+                    reconnectDelay: 20000,
+                    debug: (str) => console.log(`STOMP Debug (${user.username}): ${str}`),
+                    onConnect: () => {
+                        console.log(`STOMP connected for ${user.username}`);
+                        resolve();
+                    },
+                    onStompError: (frame) => {
+                        console.error(`STOMP error for ${user.username}:`, frame);
+                        reject(new Error(frame.headers['message']));
+                    },
+                });
+
+                stompClient.activate();
+                stompClients.push(stompClient);
+            });
+        });
+
+        await Promise.all(connectedPromises); // Wait for all STOMP clients to connect
     });
 
     test('Owner creates the game', async () => {
@@ -129,11 +136,15 @@ describe('Backend Application Integration Tests with Multiple Users', () => {
 
             // Subscribe to public game topic
             stompClient.subscribe(`/topic/game/${gameId}`, (message) => {
+                // Acknowledge the message
+                message.ack();
                 logMessage(user.username, 'Public', message.body);
             });
 
             // Subscribe to private user queue
             stompClient.subscribe(`/user/queue/game`, (message) => {
+                // Acknowledge the message
+                message.ack();
                 logMessage(user.username, 'Private', message.body);
             });
         }
@@ -181,7 +192,7 @@ describe('Backend Application Integration Tests with Multiple Users', () => {
         await Promise.all(joinPromises); // Ensures all players have joined the game
     });
 
-    test('Owner starts the game and users listen to events', async () => {
+    test('Owner starts the game', async () => {
 
         await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for 10 seconds Allow 2 seconds for messages to be received
 

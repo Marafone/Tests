@@ -1,14 +1,5 @@
 {
-  "timestamp": "2024-12-23T18:24:09.042Z",
+  "timestamp": "2024-12-27T08:16:27.909Z",
   "username": "player3",
-  "cookies": [
-    "JSESSIONID=B3A3FF5E1248327F8C7ADCCF139062C8; Path=/; HttpOnly"
-  ]
-}
-{
-  "timestamp": "2024-12-23T18:38:29.277Z",
-  "username": "player3",
-  "cookies": [
-    "JSESSIONID=3DA8B9A96056B5F18F3DD85A0AC757EC; Path=/; HttpOnly"
-  ]
+  "cookies": "JSESSIONID=0C1CFE38AA126E7997D0791F60ED33E8"
 }
