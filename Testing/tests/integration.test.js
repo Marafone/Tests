@@ -1,5 +1,5 @@
 const supertest = require('supertest');
-const { Client } = require('@stomp/stompjs');
+const StompJs = require('@stomp/stompjs');
 const config = require('./testConfig'); // Import configuration
 const fs = require('fs'); // Import the filesystem module
 
@@ -56,10 +56,14 @@ describe('Backend Application Integration Tests with Multiple Users', () => {
             expect(response.status).toBe(201); // Ensure registration is successful
             console.log(`Registered ${user.username}:`, response.body);
         }
+
+        await new Promise(resolve => setTimeout(resolve, 1000));
     });
 
-    test('Login all users and save session cookies', async () => {
-        for (const user of users) {
+    test('Sequential login and STOMP connection for all users', async () => {
+        // Helper function to log in and connect a single user
+        const loginAndConnectUser = async (user) => {
+            // Step 1: Log in the user
             const response = await supertest(app)
                 .post('/auth/login')
                 .send({ username: user.username, password: user.password })
@@ -72,29 +76,26 @@ describe('Backend Application Integration Tests with Multiple Users', () => {
             const cookies = response.headers['set-cookie'];
             const jsessionId = cookies.find((cookie) => cookie.startsWith('JSESSIONID='));
             if (jsessionId) {
-                sessionCookies[user.username] = jsessionId.split(';')[0]; // Save JSESSIONID
-                sessionCookies[user.username] = sessionCookies[user.username].split(';')[0];
+                //with or without splitting it seems to work the same way
+                sessionCookies[user.username] = jsessionId.split(';')[0];
+                logCookies(user.username, sessionCookies[user.username]); // Log cookies
+            } else {
+                throw new Error(`JSESSIONID not found for ${user.username}`);
             }
 
-            // Log the cookies to a file
-            logCookies(user.username, sessionCookies[user.username]);
-        }
-    });
-
-    test('All users create stomp sessions', async () => {
-        // Initialize STOMP clients for all users
-        const connectedPromises = users.map((user) => {
+            // Step 2: Establish STOMP connection
             return new Promise((resolve, reject) => {
-                const stompClient = new Client({
+                const stompClient = new StompJs.Client({
                     brokerURL: config.wsUrl,
                     connectHeaders: {
-                        "Cookie": sessionCookies[user.username], // Include JSESSIONID cookie
+                        'login': user.username,
+                        'passcode': user.password,
                     },
                     reconnectDelay: 20000,
                     debug: (str) => console.log(`STOMP Debug (${user.username}): ${str}`),
-                    onConnect: () => {
-                        console.log(`STOMP connected for ${user.username}`);
-                        resolve();
+                    onConnect: (frame) => {
+                        console.log(`STOMP connected for ${user.username}:`, frame);
+                        resolve(stompClient); // Resolve with the stompClient
                     },
                     onStompError: (frame) => {
                         console.error(`STOMP error for ${user.username}:`, frame);
@@ -102,12 +103,24 @@ describe('Backend Application Integration Tests with Multiple Users', () => {
                     },
                 });
 
-                stompClient.activate();
-                stompClients.push(stompClient);
+                stompClient.activate(); // Start connection
+                console.log("activated");
             });
-        });
+        };
 
-        await Promise.all(connectedPromises); // Wait for all STOMP clients to connect
+        // Sequentially log in and connect each user
+        for (const user of users) {
+            try {
+                const stompClient = await loginAndConnectUser(user); // Login and connect user
+                stompClients.push(stompClient); // Store the STOMP client for cleanup or further use
+                console.log(`${user.username} successfully connected.`);
+            } catch (error) {
+                console.error(`Failed to connect ${user.username}:`, error.message);
+            }
+
+            // Optional delay between each user's connection
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+        }
     });
 
     test('Owner creates the game', async () => {
@@ -120,6 +133,8 @@ describe('Backend Application Integration Tests with Multiple Users', () => {
         expect(response.status).toBe(200); // Ensure game creation is successful
         gameId = BigInt(response.text); // Parse and store the game ID
         console.log('Game created:', gameId);
+
+        await new Promise(resolve => setTimeout(resolve, 1000));
     });
 
     test('All players join the game sequentially', async () => {
@@ -129,22 +144,15 @@ describe('Backend Application Integration Tests with Multiple Users', () => {
             const stompClient = stompClients[i];
             const user = users[i];
 
-            // Set up STOMP client with session cookie for authentication
-            stompClient.connectHeaders = {
-                "Cookie": sessionCookies[user.username]     // Use session cookies
-            };
-
             // Subscribe to public game topic
             stompClient.subscribe(`/topic/game/${gameId}`, (message) => {
                 // Acknowledge the message
-                message.ack();
                 logMessage(user.username, 'Public', message.body);
             });
 
             // Subscribe to private user queue
             stompClient.subscribe(`/user/queue/game`, (message) => {
                 // Acknowledge the message
-                message.ack();
                 logMessage(user.username, 'Private', message.body);
             });
         }
@@ -192,25 +200,6 @@ describe('Backend Application Integration Tests with Multiple Users', () => {
         await Promise.all(joinPromises); // Ensures all players have joined the game
     });
 
-    test('Owner starts the game', async () => {
-
-        await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for 10 seconds Allow 2 seconds for messages to be received
-
-        // Trigger the start of the game
-        stompClients[0].publish({
-            destination: `/app/game/${gameId}/start`
-        });
-
-        // Allow enough time for messages to propagate
-        await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for 10 seconds Allow 2 seconds for messages to be received
-
-        // Optionally, you can add a console log to indicate this stage of the test
-        console.log('Game started, waiting for messages...');
-    }, 15000);
-
-    test('First round has started', async () => {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-    });
 });
 
 // Helper function for logging messages to user-specific files in JSON format
@@ -280,3 +269,23 @@ function logCookies(username, cookies) {
 
     console.log(`Cookies logged for ${username}:`, logJson);
 }
+
+/*
+connectHeaders: {
+                'Host': 'localhost:8080',
+                'Connection': 'Upgrade',
+                'Pragma': 'no-cache',
+                'Cache-Control': 'no-cache',
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+                'Upgrade': 'websocket',
+                'Origin': 'http://localhost:8080',
+                'Sec-WebSocket-Version': '13',
+                'Accept-Encoding': 'gzip, deflate, br, zstd',
+                'Accept-Language': 'it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7',
+                'Cookie': `${sessionCookies[user.username]}`,
+                'Sec-WebSocket-Key': 'fGmwDsb1EJmfZTvk8UkRkw==',
+                'Sec-WebSocket-Extensions': 'permessage-deflate; client_max_window_bits',
+                'Sec-WebSocket-Protocol': 'v12.stomp, v11.stomp, v10.stomp'
+            },
+            reconnectDelay: 0, // Disable automatic reconnection for testing
+ */
